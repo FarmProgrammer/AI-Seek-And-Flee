@@ -8,6 +8,7 @@ public class Bot : MonoBehaviour
     NavMeshAgent agent;
     public GameObject target;
     Drive targetMotion;
+    Vector3 wanderTarget = Vector3.zero;
     // Start is called before the first frame update
     void Start()
     {
@@ -62,9 +63,24 @@ public class Bot : MonoBehaviour
         Flee(location + target.transform.forward * lookAhead);
     }
 
+    void Wander()
+    {
+        float wanderRadius = 10;
+        float wanderDist = 10;
+        float wanderJit = 1;
+
+        wanderTarget += new Vector3(Random.RandomRange(-1, 1) * wanderJit, 0 , Random.RandomRange(-1, 1) * wanderJit);
+        wanderTarget.Normalize();
+        wanderTarget *= wanderRadius;
+
+        Vector3 targetLocal = wanderTarget + new Vector3(0, 0, wanderDist);
+        Vector3 targetWorld = transform.InverseTransformVector(targetLocal);
+        Seek(targetWorld);
+    }
+
     // Update is called once per frame
     void Update()
     {
-        Evade(target.transform.position);
+        Wander();
     }
 }
