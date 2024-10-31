@@ -6,6 +6,7 @@ TagManager:
   tags:
   - hide
   - cop
+  - robber
   layers:
   - Default
   - TransparentFX

@@ -9,6 +9,7 @@ public class Bot : MonoBehaviour
     public GameObject target;
     Drive targetMotion;
     Vector3 wanderTarget = Vector3.zero;
+    bool cooldown = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -133,7 +134,10 @@ public class Bot : MonoBehaviour
     {
         RaycastHit raycastInfo;
         Vector3 rayToTarget = target.transform.position - transform.position;
-        if(Physics.Raycast(transform.position, rayToTarget, out raycastInfo))
+
+        float lookAngle = Vector3.Angle(transform.forward, rayToTarget);
+
+        if (lookAngle < 60 && Physics.Raycast(transform.position, rayToTarget, out raycastInfo))
         {
             if(raycastInfo.transform.gameObject.tag == "cop")
             {
@@ -143,12 +147,44 @@ public class Bot : MonoBehaviour
         return false;
     }
 
+    bool CanSeeMe()
+    {
+        RaycastHit raycastInfo;
+        Vector3 lineFromTarget = transform.position - target.transform.position;
+
+        float lookAngle = Vector3.Angle(target.transform.forward, lineFromTarget);
+
+
+        if (lookAngle < 60 && Physics.Raycast(target.transform.position, lineFromTarget, out raycastInfo))
+        {
+            if (raycastInfo.transform.gameObject.tag == "robber")
+            {
+                Debug.Log("Cop can see robber");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void BehaviousCooldown()
+    {
+        cooldown = false;
+    }
     // Update is called once per frame
     void Update()
     {
-        if (CanSeeTarget())
+        if (cooldown)
         {
-            CleverHide();
+            if (CanSeeTarget() && CanSeeMe())
+            {
+                CleverHide();
+                cooldown = true;
+                Invoke("BehaviousCooldown", 5);
+            }
+            else
+            {
+                Pursue(target.transform.position);
+            }
         }
     }
 }
